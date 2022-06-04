@@ -9,7 +9,5 @@ namespace Notebook.Api.Data
         public DbSet<Note> Notes { get; set; } = null!;
 
         public NotebookContext(DbContextOptions<NotebookContext> options) : base(options) { }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder.UseNpgsql().UseSnakeCaseNamingConvention();
     }
 }

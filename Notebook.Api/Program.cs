@@ -15,7 +15,8 @@ builder.Services.AddControllers();
 
 // EF Core
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<NotebookContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddDbContext<NotebookContext>(options => options.UseNpgsql(connectionString).UseSnakeCaseNamingConvention());
+builder.Services.AddTransient<INoteRepository, NoteRepository>();
 
 // Identity
 builder.Services.AddIdentity<NotebookUser, NotebookRole>().AddEntityFrameworkStores<NotebookContext>();

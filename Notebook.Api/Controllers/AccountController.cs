@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Notebook.Api.Models;
@@ -7,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Notebook.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
     {
@@ -20,6 +21,14 @@ namespace Notebook.Api.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<ActionResult<NotebookUser>> Get()
+        {
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            return Ok(new UserResponse() { Id = user.Id, Email = user.Email });
         }
 
         [HttpPost]
@@ -39,6 +48,21 @@ namespace Notebook.Api.Controllers
             return Ok(response);
         }
 
+        [HttpPost("Login")]
+        public async Task<ActionResult<TokenResponse>> Login([FromBody] Credentials credentials)
+        {
+            var result = await _signInManager.PasswordSignInAsync(credentials.Email, credentials.Password, false, false);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest();
+            }
+
+            var user = await _userManager.FindByEmailAsync(credentials.Email);
+            var response = new TokenResponse() { Token = _tokenService.CreateForUser(user) };
+            return Ok(response);
+        }
+
         public class Credentials
         {
             [Required]
@@ -52,6 +76,15 @@ namespace Notebook.Api.Controllers
         {
             [Required]
             public string Token { get; set; } = null!;
+        }
+
+        public class UserResponse
+        {
+            [Required]
+            public int Id { get; set; } 
+
+            [Required]
+            public string Email { get; set; } = null!;
         }
     }
 }

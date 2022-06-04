@@ -19,5 +19,8 @@ namespace Notebook.Api.Models
 
         [Required]
         public DateTime CreatedAt { get; set; }
+
+        [Required]
+        public bool Public { get; set; } = true;
     }
 }
